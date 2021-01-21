@@ -1,1 +1,42 @@
-/home/baran/bin/screencap
+#!/usr/bin/python
+
+from argparse import ArgumentParser
+from pathlib import Path
+from subprocess import Popen, PIPE
+from pyscreenshot import grab
+from bbox import BBox
+from json import dumps
+from os import getcwd
+
+parser = ArgumentParser(description='Capture an image with mouse coordinates using xdotool')
+parser.add_argument('path',
+						nargs='?', 
+						type=Path,
+						help="Directory path to save images and coordinates, \
+						If not specifed, save in current directory")
+
+args = parser.parse_args()
+
+regex = "s/^x:\([0-9]\+\) y:\([0-9]\+\).*$/\\1 \\2/"
+
+input("Press enter to capture upper left corner")
+p1 = Popen(['xdotool', 'getmouselocation'], stdout=PIPE)
+p2 = Popen(['sed', regex], stdin=p1.stdout, stdout=PIPE)
+tl_point = p2.stdout.read().decode().split()
+
+input("Press enter to capture botton right corner")
+p1 = Popen(['xdotool', 'getmouselocation'], stdout=PIPE)
+p2 = Popen(['sed', regex], stdin=p1.stdout, stdout=PIPE)
+br_point = p2.stdout.read().decode().split()
+
+input("Press enter to capture clicking point")
+p1 = Popen(['xdotool', 'getmouselocation'], stdout=PIPE)
+p2 = Popen(['sed', regex], stdin=p1.stdout, stdout=PIPE)
+click_point = p2.stdout.read().decode().split()
+
+filename = input("Enter a filename: ")
+
+if args.path:
+	BBox.set_save_dir(args.path)
+bbox = BBox(filename, tl_point, br_point, click_point)
+bbox.capture()

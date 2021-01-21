@@ -1,1 +1,28 @@
-/home/baran/bin/screencomp
+#!/usr/bin/python
+
+from argparse import ArgumentParser
+from pathlib import Path
+from pyscreenshot import grab
+from PIL import Image
+from PIL.ImageStat import Stat
+
+parser = ArgumentParser(description='Compare given image and a portion on the screen')
+parser.add_argument('-v', '--verbose', action='store_true', help="Be verbose")
+parser.add_argument('image_path', type=Path, help="Path of the image to be compared")
+parser.add_argument('x1', type=int, help="x coordinate of upperleft corner of the portion on the screen to be compared")
+parser.add_argument('y1', type=int, help="y coordinate of upperleft corner of the portion on the screen to be compared")
+parser.add_argument('x2', type=int, help="x coordinate of bottomright corner of the portion on the screen to be compared")
+parser.add_argument('y2', type=int, help="y coordinate of bottomright corner of the portion on the screen to be compared")
+
+args = parser.parse_args()
+
+original_image = Image.open(args.image_path)
+current_image = grab(bbox=(args.x1, args.y1, args.x2, args.y2))
+result = (Stat(current_image).sum == Stat(original_image).sum)
+
+if args.verbose:
+	print(result)
+
+if result:
+	exit(0)
+exit(1)

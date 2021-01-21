@@ -1,1 +1,21 @@
-/home/baran/bin/rmbbox
+#!/usr/bin/python
+
+from argparse import ArgumentParser
+from pathlib import Path
+from subprocess import Popen, PIPE
+from pyscreenshot import grab
+from bbox import BBox
+from json import dumps
+from os import getcwd, remove
+
+parser = ArgumentParser(description='Capture an image with mouse coordinates using xdotool')
+parser.add_argument('path', type=Path, help="BBox path to delete")
+
+args = parser.parse_args()
+
+full_path = args.path.resolve()
+name = full_path.name.split('.')[0]
+save_dir = full_path.parent
+
+BBox.set_save_dir(save_dir)
+BBox.remove(name)
